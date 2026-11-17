@@ -218,6 +218,20 @@
         background: linear-gradient(130deg, #119b72, #23b88c);
     }
 
+    .laundry-dashboard a .finance-card {
+    cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .laundry-dashboard a:hover .finance-card {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(25, 42, 70, .15);
+    }
+
+    .laundry-dashboard a .finance-card small {
+        color: white;
+    }
+
     .laundry-dashboard .finance-unpaid {
         background: linear-gradient(130deg, #df8a24, #f2b44e);
     }
@@ -490,19 +504,32 @@
 
         {{-- Pendapatan --}}
         <div class="col-md-6 col-xl-4">
-            <div class="finance-card finance-income">
-                <div class="finance-icon">
-                    <i class="bi bi-wallet2"></i>
+            <a href="{{ route('admin.laporanPendapatan') }}"
+            class="text-decoration-none d-block">
+
+                <div class="finance-card finance-income">
+                    <div class="finance-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+
+                    <p class="finance-label">Pendapatan Diterima</p>
+
+                    <h3 class="finance-value">
+                        Rp{{ number_format($stats['paid_income'], 0, ',', '.') }}
+                    </h3>
+
+                    <p class="finance-note">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {{ $stats['paid_orders'] }} transaksi lunas
+                    </p>
+
+                    <small class="d-block mt-2">
+                        <i class="bi bi-arrow-right-circle me-1"></i>
+                        Lihat laporan pendapatan
+                    </small>
                 </div>
-                <p class="finance-label">Pendapatan Diterima</p>
-                <h3 class="finance-value">
-                    Rp{{ number_format($stats['paid_income'], 0, ',', '.') }}
-                </h3>
-                <p class="finance-note">
-                    <i class="bi bi-check-circle me-1"></i>
-                    {{ $stats['paid_orders'] }} transaksi lunas
-                </p>
-            </div>
+
+            </a>
         </div>
 
         {{-- Belum Bayar --}}

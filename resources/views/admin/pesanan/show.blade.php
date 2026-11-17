@@ -100,14 +100,14 @@
     }
 @endphp
 
-@if($paketAntar)
-    <hr>
+        @if($paketAntar && $pesanan->status !== 'cancelled')
+            <hr>
 
-    <div class="mb-3">
-        <h6 class="fw-bold">
-            <i class="bi bi-image me-2 text-primary"></i>
-            Bukti Transfer Customer
-        </h6>
+            <div class="mb-3">
+                <h6 class="fw-bold">
+                    <i class="bi bi-image me-2 text-primary"></i>
+                    Bukti Transfer Customer
+                </h6>
 
         @if($buktiPath)
             <div class="border rounded-3 p-3">
@@ -181,7 +181,7 @@
                     @else
                         <div class="alert alert-danger mb-0">
                             <i class="bi bi-exclamation-circle me-1"></i>
-                            Pembayaran tidak dapat diproses karena pesanan sudah dibatalkan.
+                            Pesanan sudah dibatalkan dan tidak dapat diubah lagi.
                         </div>
                     @endif
 
@@ -233,11 +233,6 @@
                                 Simpan Status
                             </button>
                         </form>
-                    @else
-                        <div class="alert alert-danger mb-0">
-                            <i class="bi bi-exclamation-circle me-1"></i>
-                            Pesanan ini sudah dibatalkan dan tidak dapat diubah lagi.
-                        </div>
                     @endif
 
                 </div>
@@ -316,14 +311,54 @@
                                 @endforeach
                             </tbody>
 
+                        
+                            @php
+                                $paketAntar = $detail->contains('nama_paket', 'Cuci Setrika Antar');
+                                $subtotalLaundry = $detail->sum('subtotal');
+                                $beratTotal = $detail->sum('quantity');
+
+                                $subtotalSetelahDiskon = $subtotalLaundry - ($diskon ?? 0);
+                                $ongkir = max(0, $pesanan->total_price - $subtotalSetelahDiskon);
+                            @endphp
+
                             <tfoot>
+                                @if (($diskon ?? 0) > 0)
+                                    <tr>
+                                        <th colspan="4" class="text-end fw-normal">
+                                            Diskon Member VIP (10%)
+                                        </th>
+                                        <th class="text-success">
+                                            -Rp{{ number_format($diskon, 0, ',', '.') }}
+                                        </th>
+                                    </tr>
+                                @endif
+
+                                @if ($paketAntar)
+                                    <tr>
+                                        <th colspan="4" class="text-end fw-normal">
+                                            Ongkir Antar-Jemput
+                                        </th>
+                                        <th>
+                                            @if ($beratTotal <= 0)
+                                                Belum dihitung
+                                            @elseif ($ongkir > 0)
+                                                Rp{{ number_format($ongkir, 0, ',', '.') }}
+                                            @else
+                                                <span class="text-success">Gratis</span>
+                                            @endif
+                                        </th>
+                                    </tr>
+                                @endif
+
                                 <tr>
-                                    <th colspan="4" class="text-end">Total Harga</th>
-                                    <th>
+                                    <th colspan="4" class="border-top text-end">Total Harga</th>
+                                    <th class="border-top">
                                         Rp{{ number_format($pesanan->total_price, 0, ',', '.') }}
                                     </th>
                                 </tr>
                             </tfoot>
+
+
 
                         </table>
                     </div>
@@ -361,11 +396,31 @@
             </div>
         @endif
 
-        @if ($pesanan->status !== 'cancelled' && $pesanan->payment_status !== 'paid')
+       
+        @if ($pesanan->status === 'cancelled')
+
+            <div class="alert alert-danger mb-0">
+                Pesanan sudah dibatalkan.
+            </div>
+
+        @elseif (($detail[0]->quantity ?? 0) > 0)
+
+            <div class="alert alert-success mb-0">
+                <i class="bi bi-check-circle me-2"></i>
+                Pesanan sudah ditimbang. Penimbangan tidak dapat diubah lagi.
+            </div>
+
+        @elseif ($pesanan->status === 'processing')
+
+            <div class="alert alert-info mb-0">
+                Pesanan sedang diproses. Penimbangan tidak dapat diubah lagi.
+            </div>
+
+        @elseif ($pesanan->status === 'confirmed' && $pesanan->payment_status !== 'paid')
 
             <form action="{{ route('admin.pesanan.updateWeighing', $pesanan->id) }}"
-                  method="POST"
-                  id="form-penimbangan">
+                method="POST"
+                id="form-penimbangan">
 
                 @csrf
                 @method('PATCH')
@@ -380,7 +435,7 @@
                         name="quantity"
                         class="form-control @error('quantity') is-invalid @enderror"
                         min="1"
-                        max="1000"
+                        max="15"
                         step="1"
                         value="{{ old('quantity', $detail[0]->quantity ?? '') }}"
                         placeholder="Masukkan berat pakaian"
@@ -402,20 +457,14 @@
                 </button>
             </form>
 
-        @elseif ($pesanan->status === 'cancelled')
+        @elseif ($pesanan->payment_status === 'paid')
 
-            <div class="alert alert-danger mb-0">
-                Pesanan dibatalkan. Penimbangan tidak dapat dilakukan.
-            </div>
-
-        @else
-
-            <div class="alert alert-warning mb-0">
-                Pesanan sudah dibayar. Penimbangan tidak dapat diubah.
+            <div class="alert alert-info mb-0">
+                Pembayaran sudah lunas.
             </div>
 
         @endif
-    </div>
+
 </div>
 </div>
 @endsection

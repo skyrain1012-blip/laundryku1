@@ -79,6 +79,8 @@ public function riwayat()
 }
 
 // Menampilkan detail dan perkembangan pesanan Customer
+
+// Menampilkan detail dan perkembangan pesanan Customer
 public function show(string $id)
 {
     $pesanan = DB::table('orders')
@@ -106,12 +108,31 @@ public function show(string $id)
         ->where('order_id', $id)
         ->first();
 
+    // Mengambil kategori member berdasarkan riwayat pesanan selesai
+    $hasilMember = DB::selectOne(
+        'SELECT fn_cek_kategori_member(?) AS kategori_member',
+        [$pesanan->customer_id]
+    );
+
+    $kategoriMember = $hasilMember->kategori_member;
+
+    // Menghitung diskon berdasarkan subtotal laundry
+    $subtotalLaundry = $detail->sum('subtotal');
+
+    $diskon = DB::selectOne(
+        'SELECT fn_hitung_diskon(?, ?) AS nominal_diskon',
+        [$pesanan->customer_id, $subtotalLaundry]
+    )->nominal_diskon;
+
     return view('customer.pesanan.show', compact(
         'pesanan',
         'detail',
-        'pengantaran'
+        'pengantaran',
+        'kategoriMember',
+        'diskon'
     ));
 }
+
 
     // Menampilkan formulir pemesanan
     public function create()

@@ -408,6 +408,22 @@
 
                 <h5>{{ Auth::user()->name }}</h5>
                 <p>Informasi Akun Pelanggan LaundryKu</p>
+
+                <div class="mt-2">
+                    @if($kategoriMember === 'VIP (Diskon 10%)')
+                        <span class="badge rounded-pill text-bg-success">
+                            VIP (Diskon 10%)
+                        </span>
+                    @elseif($kategoriMember === 'Member Setia')
+                        <span class="badge rounded-pill text-bg-primary">
+                            Member Setia
+                        </span>
+                    @else
+                        <span class="badge rounded-pill text-bg-secondary">
+                            Reguler
+                        </span>
+                    @endif
+                </div>
             </div>
 
             <div class="profile-body">

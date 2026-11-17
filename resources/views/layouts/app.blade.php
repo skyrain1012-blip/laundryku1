@@ -23,10 +23,10 @@
         .admin-wrapper {
             min-height: 100vh;
         }
-
+        
         .sidebar {
             width: 250px;
-            min-height: 100vh;
+            height: 100vh;
             background: #172554;
             color: white;
             position: fixed;
@@ -34,6 +34,8 @@
             left: 0;
             padding: 25px 18px;
             z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .main-content {
@@ -94,9 +96,11 @@
             .sidebar {
                 position: relative;
                 width: 100%;
+                height: auto;
+                max-height: 70vh;
+                overflow-y: auto;
                 min-height: auto;
             }
-
             .main-content {
                 margin-left: 0;
             }
@@ -133,15 +137,28 @@
 {{-- SweetAlert2 --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+
 {{-- Notifikasi Global Admin --}}
+
+<div
+    id="notifikasi-admin"
+    data-success="{{ session('success') }}"
+    data-error="{{ session('error') }}"
+></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    @if(session('success'))
+    const notifikasi = document.getElementById('notifikasi-admin');
+
+    const pesanSukses = notifikasi.dataset.success;
+    const pesanError = notifikasi.dataset.error;
+
+    if (pesanSukses) {
         Swal.fire({
             icon: 'success',
             title: 'Berhasil!',
-            text: @json(session('success')),
+            text: pesanSukses,
             confirmButtonText: 'Oke, Mengerti',
             confirmButtonColor: '#16a34a',
             customClass: {
@@ -150,13 +167,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton: 'rounded-3 px-4'
             }
         });
-    @endif
+    }
 
-    @if(session('error'))
+    if (pesanError) {
         Swal.fire({
             icon: 'error',
             title: 'Terjadi Kesalahan!',
-            text: @json(session('error')),
+            text: pesanError,
             confirmButtonText: 'Tutup',
             confirmButtonColor: '#dc2626',
             customClass: {
@@ -165,8 +182,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton: 'rounded-3 px-4'
             }
         });
-    @endif
- });
+    }
+
+});
 </script>
 
 @stack('scripts')

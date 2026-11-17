@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -111,27 +112,42 @@ class KurirController extends Controller
             ->with('success', 'Data kurir berhasil diperbarui.');
     }
 
-    public function destroy(string $id)
-    {
-        $kurir = DB::table('users')
-            ->where('id', $id)
-            ->where('role', 'courier')
-            ->first();
 
-        if (!$kurir) {
-            abort(404);
-        }
+public function destroy(string $id)
+{
+    $kurir = DB::table('users')
+        ->where('id', $id)
+        ->where('role', 'courier')
+        ->first();
 
+    if (!$kurir) {
+        abort(404);
+    }
+
+    try {
         DB::table('users')
             ->where('id', $id)
             ->where('role', 'courier')
             ->delete();
 
-        return redirect()
-            ->route('admin.kurir.index')
-            ->with('success', 'Akun kurir berhasil dihapus.');
+    } catch (QueryException $e) {
+
+        // Menangkap penolakan dari trigger MySQL
+        if (($e->errorInfo[0] ?? null) === '45000') {
+            return redirect()
+                ->route('admin.kurir.index')
+                ->with('error', 'Akun kurir tidak dapat dihapus karena masih memiliki tugas penjemputan atau pengantaran yang belum selesai.');
+        }
+
+        // Jika error database lain, teruskan error-nya
+        throw $e;
     }
-    
+
+    return redirect()
+        ->route('admin.kurir.index')
+        ->with('success', 'Akun kurir berhasil dihapus.');
+}
+
 public function show(string $id)
 {
     $kurir = DB::table('users')

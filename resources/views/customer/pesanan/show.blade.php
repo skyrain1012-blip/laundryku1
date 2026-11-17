@@ -227,9 +227,49 @@
                         </div>
                     @endforeach
 
-                    <hr>
+                    
 
-                    <div class="d-flex justify-content-between align-items-center">
+
+                        @php
+                            $subtotalLaundry = $detail->sum('subtotal');
+                            $beratTotal = $detail->sum('quantity');
+
+                            // Menghitung ongkir setelah memperhitungkan diskon
+                            $subtotalSetelahDiskon = $subtotalLaundry - $diskon;
+                            $ongkir = max(0, $pesanan->total_price - $subtotalSetelahDiskon);
+                        @endphp
+
+                        {{-- ONGKIR ANTAR-JEMPUT --}}
+                        @if($paketAntar)
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Ongkir Antar-Jemput</span>
+
+                                <strong>
+                                    @if($beratTotal <= 0)
+                                        Belum dihitung
+                                    @elseif($ongkir > 0)
+                                        Rp{{ number_format($ongkir, 0, ',', '.') }}
+                                    @else
+                                        <span class="text-success">Gratis</span>
+                                    @endif
+                                </strong>
+                            </div>
+                        @endif
+
+                        {{-- DISKON VIP --}}
+                        @if($diskon > 0)
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-success">Diskon VIP (10%)</span>
+                                <strong class="text-success">
+                                    -Rp{{ number_format($diskon, 0, ',', '.') }}
+                                </strong>
+                            </div>
+                        @endif
+
+                        <hr>
+
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <span class="fw-bold">Total Harga</span>
                         <h5 class="fw-bold text-primary mb-0">
                             @if($pesanan->total_price > 0)
@@ -240,7 +280,6 @@
                         </h5>
                     </div>
 
-                    <hr>
 
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Pembayaran</span>

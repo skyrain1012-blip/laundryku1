@@ -31,9 +31,18 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Kategori member menggunakan Stored Function
+        $hasilMember = DB::selectOne(
+            'SELECT fn_cek_kategori_member(?) AS kategori_member',
+            [$customerId]
+        );
+
+        $kategoriMember = $hasilMember->kategori_member;
+
         return view('customer.dashboard', compact(
             'ringkasan',
-            'pesananTerbaru'
+            'pesananTerbaru',
+            'kategoriMember'
         ));
     }
 }

@@ -44,6 +44,12 @@
     Pengantaran
 </a>
 
+<a href="{{ route('admin.laporan-transaksi.index') }}"
+   class="{{ request()->routeIs('admin.laporan-transaksi.*') ? 'active' : '' }}">
+    <i class="bi bi-graph-up-arrow me-2"></i>
+    Laporan Transaksi
+</a>
+
 
     <hr class="border-secondary">
 

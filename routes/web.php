@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\PesananController as CustomerPesananController;
+use App\Http\Controllers\Admin\LaporanTransaksiController;
+use App\Http\Controllers\Admin\RiwayatAktivitasController;
 
 // Halaman utama
 Route::get('/', function () {
@@ -59,6 +61,30 @@ Route::middleware(['auth', 'role:admin'])
             DashboardController::class,
             'index'
         ])->name('dashboard');
+
+        Route::get('/laporan-pendapatan', [
+            DashboardController::class,
+            'laporanPendapatan'
+        ])->name('laporanPendapatan');
+
+        // Laporan Transaksi dengan Multi JOIN
+        Route::get('/laporan-transaksi', [
+            LaporanTransaksiController::class,
+            'index'
+        ])->name('laporan-transaksi.index');
+
+        // Grafik LaundryKu
+        Route::get('/grafik-laundryku', [
+            LaporanTransaksiController::class,
+            'grafikLaundryKu'
+        ])->name('grafik-laundryku');
+
+        // Riwayat Aktivitas
+        Route::get('/riwayat-aktivitas', [
+            RiwayatAktivitasController::class,
+            'index'
+        ])->name('riwayat-aktivitas.index');
+
 
             Route::resource('pelanggan', PelangganController::class);
             Route::resource('paket', PaketController::class);

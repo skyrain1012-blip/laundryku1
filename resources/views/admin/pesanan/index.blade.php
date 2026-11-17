@@ -183,8 +183,9 @@
                                             Detail
                                         </a>
 
-                                        {{-- Batalkan Pesanan --}}
                                         @if ($item->status !== 'cancelled')
+
+                                            {{-- Batalkan Pesanan --}}
                                             <form
                                                 action="{{ route('admin.pesanan.cancel', $item->id) }}"
                                                 method="POST"
@@ -200,10 +201,26 @@
                                                     Batalkan
                                                 </button>
                                             </form>
+
                                         @else
-                                            <span class="text-muted small align-self-center">
-                                                Sudah dibatalkan
-                                            </span>
+
+                                            {{-- Hapus Pesanan yang Sudah Dibatalkan --}}
+                                            <form
+                                                action="{{ route('admin.pesanan.destroy', $item->id) }}"
+                                                method="POST"
+                                                class="form-hapus-pesanan"
+                                                data-kode="{{ $item->order_code }}"
+                                                data-pelanggan="{{ $item->nama_pelanggan }}">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash me-1"></i>
+                                                    Hapus
+                                                </button>
+                                            </form>
+
                                         @endif
 
                                     </div>
@@ -291,6 +308,48 @@ document.addEventListener('DOMContentLoaded', function () {
                     confirmButton: 'rounded-3 px-4',
                     cancelButton: 'rounded-3 px-4'
                 }
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    formIni.submit();
+                }
+            });
+        });
+
+    });
+
+        // Konfirmasi hapus pesanan
+    document.querySelectorAll('.form-hapus-pesanan').forEach(function(form) {
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formIni = this;
+            const kode = formIni.dataset.kode;
+            const pelanggan = formIni.dataset.pelanggan;
+
+            Swal.fire({
+                title: 'Hapus Pesanan?',
+                html: `
+                    <p>Apakah kamu yakin ingin menghapus pesanan ini?</p>
+                    <div class="bg-light rounded-3 p-3 text-start">
+                        <small class="text-muted d-block">Kode Pesanan</small>
+                        <strong>${escapeHtml(kode)}</strong>
+
+                        <small class="text-muted d-block mt-2">Nama Pelanggan</small>
+                        <strong>${escapeHtml(pelanggan)}</strong>
+                    </div>
+                    <p class="text-danger small mt-3">
+                        Data pesanan akan dihapus permanen.
+                    </p>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Tidak Jadi',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                reverseButtons: true,
+                focusCancel: true
             }).then(function(result) {
                 if (result.isConfirmed) {
                     formIni.submit();
